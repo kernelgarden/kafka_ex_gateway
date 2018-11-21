@@ -31,10 +31,20 @@ use Mix.Config
 
 config :kafka_ex,
   brokers: [
-    {"localhost", 9092},
+    {"localhost", 9092}
   ],
   use_ssl: false,
   commit_threshold: 10,
   commit_interval: 100,
   sync_timeout: 10_000,
   kafka_version: "2.11.2"
+
+config :kafka_ex_gateway,
+  consumer_group_name: System.get_env("KAFKA_CONSUMER_GROUP"),
+  topic_name: System.get_env("KAFKA_TOPIC_NAME"),
+  service_name: "SERVICE_NAME",
+  service_id: "SERVICE_ID",
+  max_demand_per_handler: 50,
+  max_gen_stage_buffer_size: 10_000,
+  gen_stage_consumer_size: 10
+
