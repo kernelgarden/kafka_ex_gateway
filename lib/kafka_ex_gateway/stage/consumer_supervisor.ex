@@ -14,7 +14,7 @@ defmodule KafkaExGateway.Stage.ConsumerSupervisor do
   def start_consumer(producer) do
     DynamicSupervisor.start_child(
       __MODULE__,
-      #{KafkaExGateway.Stage.Consumer, [producer]}
+      # {KafkaExGateway.Stage.Consumer, [producer]}
       %{
         id: KafkaExGateway.Stage.Consumer,
         start: {KafkaExGateway.Stage.Consumer, :start_link, [producer]}

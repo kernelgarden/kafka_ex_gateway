@@ -6,7 +6,6 @@ defmodule KafkaExGateway.Stage.Consumer do
 
   require Logger
 
-
   @default_demand_per_handler 10
 
   defstruct [
@@ -33,16 +32,18 @@ defmodule KafkaExGateway.Stage.Consumer do
       producer: producer,
       producer_from: nil,
       pending_requests: %{},
-      max_demand: Application.get_env(
-        :kafka_ex_gateway,
-        :max_demand_per_handler,
-        @default_demand_per_handler
+      max_demand:
+        Application.get_env(
+          :kafka_ex_gateway,
+          :max_demand_per_handler,
+          @default_demand_per_handler
         ),
-      event_handler_mod: Application.get_env(
-        :kafka_ex_gateway,
-        :event_handler_mod,
-        KafkaExGateway.Stage.Consumer.DefaultEventHandlerMod
-      )
+      event_handler_mod:
+        Application.get_env(
+          :kafka_ex_gateway,
+          :event_handler_mod,
+          KafkaExGateway.Stage.Consumer.DefaultEventHandlerMod
+        )
     }
 
     send(self(), :init)
@@ -64,14 +65,14 @@ defmodule KafkaExGateway.Stage.Consumer do
 
   @impl GenStage
   def handle_info(unknown_msg, state) do
-    Logger.info(fn -> "[#{__MODULE__}] Received unknown_msg - #{inspect unknown_msg}" end)
+    Logger.info(fn -> "[#{__MODULE__}] Received unknown_msg - #{inspect(unknown_msg)}" end)
     {:noreply, state}
   end
 
   @impl GenStage
   def handle_subscribe(:producer, _opts, from, state) do
     GenStage.ask(from, state.max_demand)
-    Logger.info(fn -> "[#{__MODULE__}] Subscribe to #{inspect from}" end)
+    Logger.info(fn -> "[#{__MODULE__}] Subscribe to #{inspect(from)}" end)
     {:manual, %{state | producer_from: from}}
   end
 
@@ -82,27 +83,31 @@ defmodule KafkaExGateway.Stage.Consumer do
     {:noreply, [], state}
   end
 
-  defp do_send(message,
-    %{pending_requests: pending_requests, event_handler_mod: event_handler_mod} = state)
-  do
+  defp do_send(
+         message,
+         %{pending_requests: pending_requests, event_handler_mod: event_handler_mod} = state
+       ) do
     {task_id, state} = generate_id(state)
 
-    {status, decoded} = try do
-      {:ok, Common.Message.decode(message)}
-    rescue
-      FunctionClauseError ->
-        Logger.error(fn -> "[#{__MODULE__} Cannot analyze message" end)
-        {:error, nil}
-      _ ->
-        Logger.error(fn -> "[#{__MODULE__} occured error!!!" end)
-        {:error, nil}
-    end
+    {status, decoded} =
+      try do
+        {:ok, Common.Message.decode(message)}
+      rescue
+        FunctionClauseError ->
+          Logger.error(fn -> "[#{__MODULE__} Cannot analyze message" end)
+          {:error, nil}
+
+        _ ->
+          Logger.error(fn -> "[#{__MODULE__} occured error!!!" end)
+          {:error, nil}
+      end
 
     case status do
       :ok ->
         command = decoded.meta.command
         payload = decoded.payload
         consumer = self()
+
         event_handler_mod.route_event({command, payload}, fn ->
           send(consumer, {:response, %{dispatch_id: task_id}})
         end)
@@ -118,13 +123,14 @@ defmodule KafkaExGateway.Stage.Consumer do
 
   defp handle_response(
          %{dispatch_id: dispatch_id} = _response,
-         %{pending_requests: pending_requests,
-         producer_from: producer_from,
-         max_demand: max_demand} = state
-       )
-  do
+         %{
+           pending_requests: pending_requests,
+           producer_from: producer_from,
+           max_demand: max_demand
+         } = state
+       ) do
     {_, pending_requests} = Map.pop(pending_requests, dispatch_id)
-    if (map_size(pending_requests) <= 0), do: GenStage.ask(producer_from, max_demand)
+    if map_size(pending_requests) <= 0, do: GenStage.ask(producer_from, max_demand)
 
     %{state | pending_requests: pending_requests}
   end
@@ -135,7 +141,7 @@ defmodule KafkaExGateway.Stage.Consumer do
 
   defmodule DefaultEventHandlerMod do
     def route_event({command, message}, finish_fun) do
-      IO.puts("[DefaultEventHandlerMode] Received msg: #{inspect command} - #{inspect message}")
+      IO.puts("[DefaultEventHandlerMode] Received msg: #{inspect(command)} - #{inspect(message)}")
       finish_fun.()
     end
   end

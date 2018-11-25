@@ -8,8 +8,8 @@ defmodule Common.Message do
         }
   defstruct [:meta, :payload]
 
-  field :meta, 1, type: Common.Message.Meta
-  field :payload, 2, type: :string
+  field(:meta, 1, type: Common.Message.Meta)
+  field(:payload, 2, type: :string)
 end
 
 defmodule Common.Message.Meta do
@@ -25,9 +25,9 @@ defmodule Common.Message.Meta do
         }
   defstruct [:id, :sender, :receiver, :command, :timestamp]
 
-  field :id, 1, type: :int32
-  field :sender, 2, type: :string
-  field :receiver, 3, type: :string
-  field :command, 4, type: :string
-  field :timestamp, 5, type: :string
+  field(:id, 1, type: :int32)
+  field(:sender, 2, type: :string)
+  field(:receiver, 3, type: :string)
+  field(:command, 4, type: :string)
+  field(:timestamp, 5, type: :string)
 end

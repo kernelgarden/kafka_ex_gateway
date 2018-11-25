@@ -20,7 +20,7 @@ defmodule KafkaExGateway.KafkaConsumer do
 
   def handle_message_set(message_set, {topic, partition} = state) do
     for %Message{value: message} <- message_set do
-      #IO.puts("Received msg from #{topic} - #{partition}, msg: #{inspect(message)}")
+      # IO.puts("Received msg from #{topic} - #{partition}, msg: #{inspect(message)}")
       # dispatch to gen_stage
       Producer.notify(message)
     end

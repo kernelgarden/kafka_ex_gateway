@@ -18,8 +18,8 @@ defmodule KafkaExGateway.Supervisor do
   def init(opts) do
     group_name = Application.get_env(:kafka_ex_gateway, :consumer_group_name)
     topic_name = Application.get_env(:kafka_ex_gateway, :topic_name)
-    #group_name = "gate-tester-01"
-    #topic_name = "gate-test-01"
+    # group_name = "gate-tester-01"
+    # topic_name = "gate-test-01"
 
     consumer_group_opts = [
       session_timeout: 10_000,
@@ -32,14 +32,12 @@ defmodule KafkaExGateway.Supervisor do
     children = [
       %{
         id: KafkaExGateway.Stage.ConsumerSupervisor,
-        start:
-          {KafkaExGateway.Stage.ConsumerSupervisor, :start_link, []},
+        start: {KafkaExGateway.Stage.ConsumerSupervisor, :start_link, []},
         type: :supervisor
       },
       %{
         id: KafkaExGateway.Stage.Producer,
-        start:
-          {KafkaExGateway.Stage.Producer, :start_link, []}
+        start: {KafkaExGateway.Stage.Producer, :start_link, []}
       },
       %{
         id: KafkaEx.ConsumerGroup,
@@ -52,7 +50,7 @@ defmodule KafkaExGateway.Supervisor do
              consumer_group_opts
            ]},
         type: :supervisor
-      },
+      }
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
