@@ -8,8 +8,10 @@ defmodule KafkaExGateway.Supervisor do
   end
 
   def init(opts) do
-    group_name = Keyword.fetch!(opts, :group_name)
-    topic_name = Keyword.fetch!(opts, :topic_name)
+    #group_name = Application.get_env(:kafka_ex_gateway, :consumer_group_name)
+    #topic_name = Application.get_env(:kafka_ex_gateway, :topic_name)
+    group_name = "gate-tester-01"
+    topic_name = "gate-test-01"
 
     consumer_group_opts = [
       session_timeout: 10_000,

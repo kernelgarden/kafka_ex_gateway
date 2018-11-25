@@ -1,4 +1,8 @@
 defmodule KafkaExGateway.KafkaConsumer do
+  @doc """
+  use one kafka partition per one BEAM node
+  """
+
   use KafkaEx.GenConsumer
 
   require Logger

@@ -46,5 +46,6 @@ config :kafka_ex_gateway,
   service_id: "SERVICE_ID",
   max_demand_per_handler: 50,
   max_gen_stage_buffer_size: 10_000,
-  gen_stage_consumer_size: 10
+  gen_stage_consumer_size: 10,
+  partition: 0
 

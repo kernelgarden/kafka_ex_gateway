@@ -87,14 +87,33 @@ defmodule KafkaExGateway.Stage.Consumer do
   do
     {task_id, state} = generate_id(state)
 
-    consumer = self()
-    event_handler_mod.route_event(message, fn ->
-      send(consumer, {:response, %{dispatch_id: task_id}})
-    end)
+    {status, decoded} = try do
+      {:ok, Common.Message.decode(message)}
+    rescue
+      FunctionClauseError ->
+        Logger.error(fn -> "[#{__MODULE__} Cannot analyze message" end)
+        {:error, nil}
+      _ ->
+        Logger.error(fn -> "[#{__MODULE__} occured error!!!" end)
+        {:error, nil}
+    end
 
-    pending_requests = Map.put(pending_requests, task_id, message)
+    case status do
+      :ok ->
+        command = decoded.meta.command
+        payload = decoded.payload
+        consumer = self()
+        event_handler_mod.route_event({command, payload}, fn ->
+          send(consumer, {:response, %{dispatch_id: task_id}})
+        end)
 
-    %{state | pending_requests: pending_requests}
+        pending_requests = Map.put(pending_requests, task_id, decoded.meta.id)
+
+        %{state | pending_requests: pending_requests}
+
+      :error ->
+        state
+    end
   end
 
   defp handle_response(
@@ -115,8 +134,8 @@ defmodule KafkaExGateway.Stage.Consumer do
   end
 
   defmodule DefaultEventHandlerMod do
-    def route_event(message, finish_fun) do
-      IO.puts("[DefaultEventHandlerMode] Received msg: #{inspect message}")
+    def route_event({command, message}, finish_fun) do
+      IO.puts("[DefaultEventHandlerMode] Received msg: #{inspect command} - #{inspect message}")
       finish_fun.()
     end
   end

@@ -1,0 +1,15 @@
+syntax = "proto3";
+package Common;
+
+message Message{
+    message Meta {
+        int32 id = 1;
+        string sender = 2;
+        string receiver = 3;
+        string command = 4;
+        string timestamp = 5;
+    }
+
+    Meta meta = 1;
+    string payload = 2;
+}
